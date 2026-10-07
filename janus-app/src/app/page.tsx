@@ -627,19 +627,14 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Faucet Drip Helper Banner (Claim Testnet AUSD) ── */}
-        <div className="mb-6 bg-gradient-to-r from-[#836EF9]/15 to-[#10B981]/10 border border-[#836EF9]/30 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#10B981]/20 text-[#10B981] flex items-center justify-center shrink-0">
-              <Droplets className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-white">
-                Need Testnet Funds?
-              </p>
-              <p className="text-[10px] text-white/50">
-                Claim 10,000 Agora AUSD to your address
-              </p>
-            </div>
+        <div className="mb-6 bg-gradient-to-r from-[#836EF9]/15 to-[#10B981]/10 border border-[#836EF9]/30 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm">
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-white">
+              Need Testnet Funds?
+            </p>
+            <p className="mt-0.5 text-[10px] text-white/50">
+              Claim 10,000 Agora AUSD to your address
+            </p>
           </div>
 
           <button
