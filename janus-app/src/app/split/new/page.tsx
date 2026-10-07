@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -31,7 +31,7 @@ interface Participant {
   isOwner?: boolean;
 }
 
-export default function SplitPage() {
+function SplitPageContent() {
   const { authenticated, user, login } = usePrivy();
   const { sendTransaction } = useSendTransaction();
   const searchParams = useSearchParams();
@@ -646,5 +646,13 @@ export default function SplitPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function SplitPage() {
+  return (
+    <Suspense fallback={null}>
+      <SplitPageContent />
+    </Suspense>
   );
 }

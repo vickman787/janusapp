@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import SplitPage from "./new/page";
 
 export default function SplitRootPage() {
-  return <SplitPage />;
+  return (
+    <Suspense fallback={null}>
+      <SplitPage />
+    </Suspense>
+  );
 }
