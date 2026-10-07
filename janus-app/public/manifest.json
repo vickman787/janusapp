@@ -1,0 +1,40 @@
+{
+  "name": "Janus",
+  "short_name": "Janus",
+  "description": "Instant AUSD splits and payments on Monad",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0813",
+  "theme_color": "#836EF9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Split Bill",
+      "short_name": "Split",
+      "url": "/split/new",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Send AUSD",
+      "short_name": "Send",
+      "url": "/pay/new",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "categories": ["finance", "utilities"],
+  "prefer_related_applications": false
+}

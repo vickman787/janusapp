@@ -1,0 +1,29 @@
+{
+  "name": "janus-contracts",
+  "version": "1.0.0",
+  "description": "JanusSplit smart contracts for Monad Testnet — Hardhat + Foundry dual environment",
+  "scripts": {
+    "compile":        "hardhat compile",
+    "test:hardhat":   "hardhat test",
+    "test:gas":       "REPORT_GAS=true hardhat test",
+    "test:forge":     "forge test -vvv",
+    "test:forge:gas": "forge test --gas-report",
+    "test:forge:fuzz":"forge test --fuzz-runs 1000 -vvv",
+    "deploy:local":   "hardhat run script/deploy.ts --network hardhat",
+    "deploy:monad":   "forge script script/DeployJanusSplit.s.sol --rpc-url https://rpc.testnet.monad.xyz --broadcast -vvvv",
+    "deploy:monad:v2":"forge script script/DeployJanusSplitV2.s.sol --rpc-url https://rpc.testnet.monad.xyz --broadcast -vvvv",
+    "forge:install":  "forge install foundry-rs/forge-std --no-commit",
+    "forge:build":    "forge build",
+    "typechain":      "hardhat typechain"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-foundry": "^1.1.1",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.22.0",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.4.5",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.0.0",
+    "chai": "^4.4.1"
+  }
+}

@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+:root {
+  --background:  #0B0813;
+  --foreground:  #FFFFFF;
+  --brand:       #836EF9;
+  --brand-light: #A78BFA;
+  --accent:      #A0055D;
+  --accent-light:#F472B6;
+  --success:     #10B981;
+  --surface:     #161224;
+  --surface-alt: #1E1833;
+  --border:      #2A2242;
+  --border-glow: rgba(131, 110, 249, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color:      var(--foreground);
+  font-family: var(--font-geist-sans), "Inter", system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Smooth scrolling on iOS */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar        { width: 4px; }
+::-webkit-scrollbar-track  { background: var(--surface); }
+::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+
+/* Focus ring override for brand color */
+*:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Monad Brand Gradients & Shadows */
+.bg-gradient-brand {
+  background: linear-gradient(135deg, #836EF9 0%, #6848D7 45%, #A0055D 100%);
+}
+
+.shadow-brand {
+  box-shadow: 0 8px 32px -4px rgba(131, 110, 249, 0.4), 0 0 16px rgba(160, 5, 93, 0.25);
+}
+
+.shadow-card {
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.6), 0 0 12px rgba(131, 110, 249, 0.08);
+}
+
+/* Glow utility (used on FaceID confirmation) */
+.glow-success {
+  box-shadow: 0 0 36px rgba(16, 185, 129, 0.55);
+}
+
+.glow-brand {
+  box-shadow: 0 0 40px rgba(131, 110, 249, 0.55), 0 0 16px rgba(160, 5, 93, 0.3);
+}
+
+/* Glassmorphism Surface */
+.glass-surface {
+  background: rgba(22, 18, 36, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(131, 110, 249, 0.2);
+}
+
+/* Number font for AUSD amounts */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle glow pulsator */
+@keyframes ambientGlow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+.animate-ambient {
+  animation: ambientGlow 8s ease-in-out infinite;
+}

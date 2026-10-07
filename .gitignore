@@ -1,0 +1,55 @@
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Keep environment examples trackable in nested apps, but ignore real values.
+**/.env
+**/.env.*
+!**/.env.example
+
+# Private keys, keystores, and credential files
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+credentials.json
+service-account*.json
+
+# Secret/credential directories
+**/secrets/
+**/credentials/
+
+# Dependencies
+node_modules/
+janus-app/node_modules/
+
+# Next.js and frontend output
+janus-app/.next/
+janus-app/out/
+janus-app/build/
+janus-app/coverage/
+
+# Solidity build and deployment output
+artifacts/
+artifacts-*/
+cache/
+cache-hardhat/
+cache-hardhat-*/
+out/
+broadcast/
+typechain-types/
+
+# Local application data
+janus-app/data/janus_store.json
+janus-app/data/*.sqlite
+janus-app/data/*.sqlite-shm
+janus-app/data/*.sqlite-wal
+
+# Tooling and OS files
+*.tsbuildinfo
+*.log
+.DS_Store
+.vercel/
+

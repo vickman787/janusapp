@@ -1,0 +1,71 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Face Gradients: pure crisp white to bright Monad electric purple -->
+    <linearGradient id="faceLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="30%" stop-color="#F5F3FF" />
+      <stop offset="65%" stop-color="#D8B4FE" />
+      <stop offset="100%" stop-color="#836EF9" />
+    </linearGradient>
+
+    <linearGradient id="ribbonCenter" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="40%" stop-color="#E9D5FF" />
+      <stop offset="80%" stop-color="#C084FC" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+  </defs>
+
+  <!-- Dark circular badge background matching the Janus app emblem -->
+  <circle cx="50" cy="50" r="47" fill="#0D091D" />
+  <!-- Glowing Monad purple border ring -->
+  <circle cx="50" cy="50" r="47" stroke="#836EF9" stroke-width="2.5" stroke-opacity="0.9" />
+  <!-- Inner subtle accent ring -->
+  <circle cx="50" cy="50" r="44" stroke="#836EF9" stroke-width="1" stroke-opacity="0.3" />
+
+  <!-- ── Left Face Silhouette Profile ── -->
+  <path
+    d="M44 24 C34 24 26 32 24 42 C22 47 24 49 20 53 C17 56 18 60 21 62 C24 64 25 64 25 67 C25 71 20 73 22 78 C25 83 33 85 44 85"
+    stroke="url(#faceLight)"
+    stroke-width="5.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+
+  <!-- ── Left Hair Ribbon Curls ── -->
+  <path
+    d="M44 24 C48 30 52 38 48 46 C44 54 38 52 42 62 C46 72 52 74 46 84"
+    stroke="url(#ribbonCenter)"
+    stroke-width="5"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- ── Right Face Silhouette Profile ── -->
+  <path
+    d="M56 24 C66 24 74 32 76 42 C78 47 76 49 80 53 C83 56 82 60 79 62 C76 64 75 64 75 67 C75 71 80 73 78 78 C75 83 67 85 56 85"
+    stroke="url(#faceLight)"
+    stroke-width="5.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+
+  <!-- ── Right Hair Ribbon Curls ── -->
+  <path
+    d="M56 24 C52 30 48 38 52 46 C56 54 62 52 58 62 C54 72 48 74 54 84"
+    stroke="url(#ribbonCenter)"
+    stroke-width="5"
+    stroke-linecap="round"
+    fill="none"
+  />
+
+  <!-- ── Top Intertwining Arch Loop ── -->
+  <path
+    d="M46 22 C48 17 52 17 54 22"
+    stroke="#FFFFFF"
+    stroke-width="5"
+    stroke-linecap="round"
+  />
+</svg>
