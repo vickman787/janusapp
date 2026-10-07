@@ -91,11 +91,13 @@ export default function SplitPage() {
 
   useEffect(() => {
     if (!groupId || !activeAddress) return;
+    const requestedGroupId = groupId;
+    const organizerAddress = activeAddress;
     let disposed = false;
     async function loadGroup() {
       try {
         const response = await fetch(
-          `/api/groups?id=${encodeURIComponent(groupId)}&address=${encodeURIComponent(activeAddress)}`,
+          `/api/groups?id=${encodeURIComponent(requestedGroupId)}&address=${encodeURIComponent(organizerAddress)}`,
           { headers: await getServerAuthHeaders() }
         );
         const data = await response.json();
