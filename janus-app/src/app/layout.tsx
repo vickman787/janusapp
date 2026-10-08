@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B0813",
+  themeColor: "#FAF9FF",
   width: "device-width",
   initialScale: 1,
 };
@@ -32,7 +32,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.dataset.theme = localStorage.getItem("janus-theme") || "light";`,
+          }}
+        />
+      </head>
       <body
         className="antialiased bg-[#0B0813] text-white min-h-screen relative overflow-x-hidden"
       >

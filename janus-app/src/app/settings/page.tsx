@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { JanusLogo } from "@/components/JanusLogo";
+import { BottomNav } from "@/components/BottomNav";
 import { getAccessToken, getIdentityToken, usePrivy, useSendTransaction, useSignMessage } from "@privy-io/react-auth";
 import { profileProofMessage } from "@/lib/profileProof";
 import { encodeFunctionData } from "viem";
@@ -150,7 +151,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0813] text-white px-5 pt-7 pb-12 max-w-md mx-auto relative flex flex-col justify-between">
+    <main className="min-h-screen bg-[#0B0813] text-white px-5 pt-7 pb-28 max-w-md mx-auto relative flex flex-col justify-between">
       <div>
         <header className="pt-2 pb-6 flex items-center justify-between">
           <Link
@@ -354,7 +355,7 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Privy Login / Disconnect */}
+            {/* Privy Disconnect */}
             {authenticated ? (
               <button
                 onClick={logout}
@@ -363,15 +364,7 @@ export default function SettingsPage() {
                 <span className="text-sm font-medium">Disconnect account</span>
                 <LogOut className="h-4 w-4" />
               </button>
-            ) : (
-              <button
-                onClick={login}
-                className="flex w-full items-center justify-between py-3.5 text-left text-[#A78BFA] transition-colors hover:text-white"
-              >
-                <span className="text-sm font-medium">Connect account</span>
-                <LogIn className="h-4 w-4" />
-              </button>
-            )}
+            ) : null}
           </div>
         </section>
       </div>
@@ -382,6 +375,8 @@ export default function SettingsPage() {
           JANUS Consumer Payments
         </p>
       </div>
+
+      <BottomNav />
     </main>
   );
 }

@@ -1,17 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --background:  #0B0813;
-  --foreground:  #FFFFFF;
+  --background:  #FAF9FF;
+  --foreground:  #17152A;
   --brand:       #836EF9;
   --brand-light: #A78BFA;
   --accent:      #A0055D;
   --accent-light:#F472B6;
   --success:     #10B981;
-  --surface:     #161224;
-  --surface-alt: #1E1833;
-  --border:      #2A2242;
+  --surface:     #F1EEFF;
+  --surface-alt: #FFFFFF;
+  --border:      #DED8F5;
   --border-glow: rgba(131, 110, 249, 0.35);
+}
+
+html[data-theme="dark"] {
+  --background: #0B0813;
+  --foreground: #FFFFFF;
+  --surface: #161224;
+  --surface-alt: #1E1833;
+  --border: #2A2242;
 }
 
 * {
@@ -93,3 +101,55 @@ html {
 .animate-ambient {
   animation: ambientGlow 8s ease-in-out infinite;
 }
+
+/* Light mode overrides the existing dark utility classes without changing
+   the established dark-mode design. */
+html[data-theme="light"] body,
+html[data-theme="light"] [class~="bg-[#0B0813]"] { background: #FAF9FF !important; color: #17152A !important; }
+html[data-theme="light"] [class~="bg-[#100D1B]/70"] { background: rgba(241, 238, 255, 0.7) !important; }
+html[data-theme="light"] [class~="bg-[#13101D]"],
+html[data-theme="light"] [class~="bg-[#161224]/80"],
+html[data-theme="light"] [class~="bg-[#161224]/95"] { background: #FFFFFF !important; }
+html[data-theme="light"] [class~="text-white"],
+html[data-theme="light"] [class~="text-white/90"],
+html[data-theme="light"] [class~="text-white/85"],
+html[data-theme="light"] [class~="text-white/80"],
+html[data-theme="light"] [class~="text-white/95"] { color: #17152A !important; }
+html[data-theme="light"] [class~="text-white/75"],
+html[data-theme="light"] [class~="text-white/70"],
+html[data-theme="light"] [class~="text-white/65"],
+html[data-theme="light"] [class~="text-white/60"],
+html[data-theme="light"] [class~="text-white/55"],
+html[data-theme="light"] [class~="text-white/50"],
+html[data-theme="light"] [class~="text-white/45"],
+html[data-theme="light"] [class~="text-white/40"],
+html[data-theme="light"] [class~="text-white/35"],
+html[data-theme="light"] [class~="text-white/30"],
+html[data-theme="light"] [class~="text-white/20"] { color: #69708C !important; }
+html[data-theme="light"] [class~="border-white/15"],
+html[data-theme="light"] [class~="border-white/10"],
+html[data-theme="light"] [class~="border-white/20"] { border-color: #DED8F5 !important; }
+html[data-theme="light"] [class~="divide-white/10"] > :not([hidden]) ~ :not([hidden]) { border-color: #E9E5F7 !important; }
+html[data-theme="light"] [class~="bg-white/10"],
+html[data-theme="light"] [class~="bg-white/[0.02]"] { background: #F1EEFF !important; }
+html[data-theme="light"] [class~="text-[#A78BFA]"],
+html[data-theme="light"] [class~="text-[#C5BCFF]"] { color: #6848D7 !important; }
+html[data-theme="light"] [class~="text-amber-300"],
+html[data-theme="light"] [class~="text-amber-200"],
+html[data-theme="light"] [class~="text-amber-200/80"],
+html[data-theme="light"] [class~="text-amber-200/90"] { color: #B45309 !important; }
+html[data-theme="light"] [class~="border-[#2A2242]"] { border-color: #DED8F5 !important; }
+html[data-theme="light"] [class~="bg-[#0B0813]/80"] { background: rgba(250, 249, 255, 0.82) !important; }
+html[data-theme="light"] .shadow-card { box-shadow: 0 4px 24px -2px rgba(73, 55, 145, 0.12), 0 0 12px rgba(131, 110, 249, 0.08); }
+
+/* Hero phones follow the active theme. */
+html[data-theme="light"] .janus-phone { background: #FFFFFF !important; border-color: #D8D0F4 !important; }
+html[data-theme="light"] .janus-phone-screen { background: #F7F5FF !important; border-color: #D8D0F4 !important; }
+html[data-theme="light"] .janus-phone [class~="text-white"] { color: #17152A !important; }
+html[data-theme="light"] .janus-phone [class~="text-white/75"] { color: #4C5274 !important; }
+html[data-theme="light"] .janus-phone [class~="text-white/55"],
+html[data-theme="light"] .janus-phone [class~="text-white/40"] { color: #69708C !important; }
+html[data-theme="light"] .janus-phone [class~="text-white/35"] { color: #858BA4 !important; }
+html[data-theme="light"] .janus-phone [class~="border-white/10"],
+html[data-theme="light"] .janus-phone [class~="border-white/15"] { border-color: #D8D0F4 !important; }
+html[data-theme="light"] .janus-phone [class~="bg-white/10"] { background: #EDE9FF !important; }

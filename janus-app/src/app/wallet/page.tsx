@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { JanusLogo } from "@/components/JanusLogo";
 import { BottomNav } from "@/components/BottomNav";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { usePrivy, useSendTransaction } from "@privy-io/react-auth";
 import { encodeFunctionData, isAddress, parseUnits } from "viem";
 import { describeError } from "@/lib/errors";
@@ -550,18 +551,20 @@ export default function DashboardPage() {
             <JanusLogo size={34} showText={true} />
           </Link>
 
-          {/* Privy Auth Button / Status */}
-          {!authenticated ? (
-            <button
-              onClick={login}
-              className="flex shrink-0 items-center gap-2 rounded-lg bg-[#836EF9] px-3 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#927fff] active:scale-95 sm:px-4"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span className="sm:hidden">Sign in</span>
-              <span className="hidden sm:inline">Connect / Sign In</span>
-            </button>
-          ) : (
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            {/* Privy Auth Button / Status */}
+            {!authenticated ? (
+              <button
+                onClick={login}
+                className="flex shrink-0 items-center gap-2 rounded-lg bg-[#836EF9] px-3 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#927fff] active:scale-95 sm:px-4"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span className="sm:hidden">Sign in</span>
+                <span className="hidden sm:inline">Connect / Sign In</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
               <Link
                 href="/settings"
                 className="flex items-center gap-2 py-1.5 px-3 rounded-lg bg-[#161224]/80 border border-white/10 hover:border-[#836EF9]/50 transition-colors shadow-sm"
@@ -581,8 +584,9 @@ export default function DashboardPage() {
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </header>
 
         {profileLoadError && authenticated && activeAddress && (

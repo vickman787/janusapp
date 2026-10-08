@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { JanusLogo } from "@/components/JanusLogo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function PreviewShell({
   children,
@@ -15,14 +16,17 @@ export function PreviewShell({
         <Link href="/" aria-label="JANUS home" className="shrink-0">
           <JanusLogo size={32} showText />
         </Link>
-        <nav className="hidden items-center gap-8 text-sm text-white/55 sm:flex">
+        <div className="flex items-center gap-4">
+          <nav className="hidden items-center gap-8 text-sm text-white/55 sm:flex">
           <Link href="/" className={active === "welcome" ? "text-white" : "transition-colors hover:text-white"}>
             Welcome
           </Link>
           <Link href="/wallet" className={active === "wallet" ? "text-white" : "transition-colors hover:text-white"}>
             Wallet
           </Link>
-        </nav>
+          </nav>
+          <ThemeToggle />
+        </div>
       </header>
       {children}
       <footer className="mx-auto flex w-full max-w-[1440px] flex-col gap-3 border-t border-white/10 px-5 py-8 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">

@@ -1,0 +1,33 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="face" x1="218" y1="225" x2="390" y2="405" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="0.55" stop-color="#E0D7FE"/>
+      <stop offset="1" stop-color="#836EF9"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="250" y1="220" x2="360" y2="410" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C084FC"/>
+      <stop offset="0.55" stop-color="#836EF9"/>
+      <stop offset="1" stop-color="#A0055D"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#0B0813"/>
+  <rect x="72" y="72" width="1056" height="486" rx="34" fill="#100D1B" stroke="#2A2242" stroke-width="2"/>
+
+  <g transform="translate(120 133) scale(3.65)">
+    <rect x="0" y="0" width="100" height="100" rx="24" fill="#161224" stroke="#40345F" stroke-width="1.5"/>
+    <path d="M44 24C34 24 26 32 24 42C22 47 24 49 20 53C17 56 18 60 21 62C24 64 25 64 25 67C25 71 20 73 22 78C25 83 33 85 44 85" stroke="url(#face)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M44 24C48 30 52 38 48 46C44 54 38 52 42 62C46 72 52 74 46 84" stroke="url(#ribbon)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M56 24C66 24 74 32 76 42C78 47 76 49 80 53C83 56 82 60 79 62C76 64 75 64 75 67C75 71 80 73 78 78C75 83 67 85 56 85" stroke="url(#face)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M56 24C52 30 48 38 52 46C56 54 62 52 58 62C54 72 48 74 54 84" stroke="url(#ribbon)" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M46 22C48 18 52 18 54 22" stroke="#C084FC" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(545 214)">
+    <text x="0" y="92" fill="#F7F5FB" font-family="Georgia, 'Times New Roman', serif" font-size="112" font-weight="700" letter-spacing="18">JANUS</text>
+    <text x="5" y="154" fill="#A78BFA" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" letter-spacing="12">CONSUMER PAYMENTS</text>
+    <line x1="5" y1="194" x2="500" y2="194" stroke="#2A2242" stroke-width="2"/>
+    <text x="5" y="242" fill="#9B96A4" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="1">Shared costs, settled.</text>
+  </g>
+</svg>

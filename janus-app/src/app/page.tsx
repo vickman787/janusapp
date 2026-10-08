@@ -14,9 +14,9 @@ export default function WelcomePreviewPage() {
       <main>
         <section className="mx-auto grid w-full max-w-[1440px] gap-10 px-5 pb-16 pt-8 sm:px-8 sm:pt-12 xl:grid-cols-[1.05fr_0.95fr] xl:items-center xl:gap-16 xl:px-10 xl:pb-28 xl:pt-20">
           <div>
-            <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#A78BFA]">Shared costs, settled</p>
+            <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#A78BFA]">Shared costs, SETTLED</p>
             <h1 className="max-w-[680px] text-[clamp(2.65rem,12vw,4.75rem)] font-semibold leading-[1.02] tracking-[-0.055em] text-white">
-              Stop chasing people for money.
+              Money moments, made simple.
             </h1>
             <p className="mt-7 max-w-[510px] text-base leading-7 text-white/55 sm:text-lg">
               JANUS makes dinner, rent, and trip expenses simple to settle. One clear request, private by default, finished in seconds.
@@ -66,5 +66,5 @@ export default function WelcomePreviewPage() {
 }
 
 function PhoneFrame({ children, label, className = "" }: { children: React.ReactNode; label: string; className?: string }) {
-  return <div className={`flex min-h-[350px] w-[min(190px,43vw)] shrink-0 rounded-[24px] border border-white/15 bg-[#171323] p-1.5 sm:min-h-[390px] sm:rounded-[26px] sm:p-2 xl:min-h-[460px] xl:w-[230px] xl:rounded-[30px] xl:p-2.5 ${className}`}><div className="flex-1 overflow-hidden rounded-[19px] border border-white/10 bg-[#0F0C18] px-3 pb-5 pt-3 sm:rounded-[20px] sm:px-4 xl:rounded-[24px] xl:px-5 xl:pb-7 xl:pt-4"><div className="mx-auto mb-6 h-1 w-10 rounded-full bg-white/15 sm:w-12 xl:mb-8 xl:w-14" /><div className="text-xs font-medium text-white/75">{label}</div>{children}</div></div>;
+  return <div className={`janus-phone flex min-h-[350px] w-[min(190px,43vw)] shrink-0 rounded-[24px] border border-white/15 bg-[#171323] p-1.5 sm:min-h-[390px] sm:rounded-[26px] sm:p-2 xl:min-h-[460px] xl:w-[230px] xl:rounded-[30px] xl:p-2.5 ${className}`}><div className="janus-phone-screen flex-1 overflow-hidden rounded-[19px] border border-white/10 bg-[#0F0C18] px-3 pb-5 pt-3 sm:rounded-[20px] sm:px-4 xl:rounded-[24px] xl:px-5 xl:pb-7 xl:pt-4"><div className="mx-auto mb-6 h-1 w-10 rounded-full bg-white/15 sm:w-12 xl:mb-8 xl:w-14" /><div className="text-xs font-medium text-white/75">{label}</div>{children}</div></div>;
 }
