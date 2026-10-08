@@ -609,9 +609,9 @@ export default function DashboardPage() {
             )}
           </p>
 
-          {/* If authenticated: display shortened wallet address and disconnect button */}
+          {/* If authenticated: display the active wallet address. Account controls live in the header. */}
           {authenticated && activeAddress ? (
-            <div className="mt-5 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
+            <div className="mt-5 border-t border-white/10 pt-4">
               <button
                 onClick={handleCopyAddress}
                 className="flex items-center gap-1.5 text-[11px] font-mono text-white/55 transition-colors hover:text-white"
@@ -624,25 +624,10 @@ export default function DashboardPage() {
                   <Copy className="w-3 h-3 text-white/40" />
                 )}
               </button>
-              <button
-                onClick={logout}
-                className="flex items-center gap-1 text-[11px] text-white/40 transition-colors hover:text-red-300"
-                title="Disconnect"
-              >
-                <LogOut className="w-3 h-3" />
-                <span>Disconnect</span>
-              </button>
             </div>
           ) : (
-            <div className="mt-4 pt-3 border-t border-[#2A2242]/70 flex flex-col items-center">
-              <p className="text-[11px] text-white/40 mb-2">Sign in to see your balance and payments</p>
-              <button
-                onClick={login}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#836EF9] text-white text-xs font-semibold hover:bg-[#927fff] active:scale-95 transition-all"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Connect / Sign In</span>
-              </button>
+            <div className="mt-4 border-t border-[#2A2242]/70 pt-3 text-center">
+              <p className="text-[11px] text-white/40">Sign in from the header to see your balance and payments</p>
             </div>
           )}
         </div>
@@ -956,15 +941,9 @@ export default function DashboardPage() {
               <p className="text-sm font-bold text-white mb-1">
                 Your payment history will appear here
               </p>
-              <p className="text-xs text-white/40 max-w-xs mx-auto mb-4">
-                Sign in to see transfers, payments, and split activity.
+              <p className="mx-auto max-w-xs text-xs text-white/40">
+                Sign in from the header to see transfers, payments, and split activity.
               </p>
-              <button
-                onClick={login}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#836EF9] text-white text-xs font-semibold hover:bg-[#927fff] transition-colors"
-              >
-                Connect to View
-              </button>
             </div>
           ) : activity.length === 0 ? (
             <div className="border-y border-white/10 py-8 text-center">
