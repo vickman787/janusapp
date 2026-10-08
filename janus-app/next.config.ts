@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline' https://*.privy.io",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https:",
-      `connect-src 'self' https://*.privy.io https://*.monad.xyz https://*.monadscan.com https://*.quicknode.pro https://*.quiknode.pro wss://*.privy.io wss://*.walletconnect.com${isDevelopment ? " http://localhost:3000 ws://localhost:3000" : ""}`,
+      `connect-src 'self' https://*.privy.io https://*.monad.xyz https://*.monadscan.com https://*.quicknode.pro https://*.quiknode.pro https://*.walletconnect.com wss://*.privy.io wss://*.walletconnect.com${isDevelopment ? " http://localhost:3000 ws://localhost:3000" : ""}`,
       "frame-src 'self' https://*.privy.io https://accounts.google.com",
       "worker-src 'self' blob:",
       "object-src 'none'",
