@@ -7,21 +7,26 @@ import {
   LogOut,
   LogIn,
   ArrowLeft,
-  Droplets,
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { JanusLogo } from "@/components/JanusLogo";
-import { getAccessToken, getIdentityToken, usePrivy, useSignMessage } from "@privy-io/react-auth";
+import { getAccessToken, getIdentityToken, usePrivy, useSendTransaction, useSignMessage } from "@privy-io/react-auth";
 import { profileProofMessage } from "@/lib/profileProof";
+import { encodeFunctionData } from "viem";
 import {
   AUSD_ADDRESS,
   JANUS_SPLIT_ADDRESS,
+  AGORA_FAUCET_ABI,
   AGORA_FAUCET_ADDRESS,
+  ensureGas,
+  MON_GAS_REQUIRED_MESSAGE,
+  publicClient,
 } from "@/lib/web3";
 
 export default function SettingsPage() {
   const { login, logout, authenticated, user } = usePrivy();
+  const { sendTransaction } = useSendTransaction();
   const { signMessage } = useSignMessage();
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedContract, setCopiedContract] = useState(false);
@@ -29,6 +34,7 @@ export default function SettingsPage() {
   // Faucet state
   const [isClaimingFaucet, setIsClaimingFaucet] = useState(false);
   const [faucetMsg, setFaucetMsg] = useState<string | null>(null);
+  const [faucetErrorMsg, setFaucetErrorMsg] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [registeredUsername, setRegisteredUsername] = useState<string | null>(null);
   const [usernameMsg, setUsernameMsg] = useState<string | null>(null);
@@ -47,13 +53,17 @@ export default function SettingsPage() {
         },
       });
       const data = await res.json();
+      if (!res.ok) {
+        setUsernameMsg("Your saved username could not be loaded right now. Your profile has not been changed.");
+        return;
+      }
       if (data.profile?.username) {
         setUsername(data.profile.username);
         setRegisteredUsername(data.profile.username);
       } else {
         setRegisteredUsername(null);
       }
-    })().catch(() => undefined);
+    })().catch(() => setUsernameMsg("Your saved username could not be loaded right now. Your profile has not been changed."));
   }, [authenticated, activeAddress]);
 
   async function handleSaveUsername() {
@@ -112,21 +122,28 @@ export default function SettingsPage() {
     if (isClaimingFaucet) return;
     setIsClaimingFaucet(true);
     setFaucetMsg(null);
+    setFaucetErrorMsg(null);
     try {
-      const res = await fetch("/api/faucet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: activeAddress }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setFaucetMsg("+10,000 AUSD Claimed!");
-        setTimeout(() => setFaucetMsg(null), 4000);
-      } else {
-        alert(data.error || "Failed to claim");
+      if (!(await ensureGas(activeAddress))) {
+        setFaucetErrorMsg(MON_GAS_REQUIRED_MESSAGE);
+        return;
       }
-    } catch {
-      alert("Error contacting faucet");
+
+      const callData = encodeFunctionData({
+        abi: AGORA_FAUCET_ABI,
+        functionName: "requestFunds",
+        args: [activeAddress as `0x${string}`] as const,
+      });
+      const { hash } = await sendTransaction(
+        { to: AGORA_FAUCET_ADDRESS, data: callData, chainId: 10143 },
+        { address: activeAddress }
+      );
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      if (receipt.status !== "success") throw new Error("AUSD faucet claim reverted");
+      setFaucetMsg("+10,000 AUSD Claimed!");
+      setTimeout(() => setFaucetMsg(null), 4000);
+    } catch (error) {
+      setFaucetErrorMsg(error instanceof Error ? error.message : "AUSD faucet claim failed");
     } finally {
       setIsClaimingFaucet(false);
     }
@@ -137,10 +154,11 @@ export default function SettingsPage() {
       <div>
         <header className="pt-2 pb-6 flex items-center justify-between">
           <Link
-            href="/"
-            className="w-10 h-10 rounded-full bg-[#161224] border border-[#2A2242] flex items-center justify-center hover:border-[#836EF9]/50 transition-colors shadow-sm"
+            href="/wallet"
+            className="inline-flex items-center gap-2 py-2 text-sm text-white/60 hover:text-white transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-white/70" />
+            <ArrowLeft className="w-4 h-4" />
+            <span>Wallet</span>
           </Link>
           <JanusLogo size={36} showText={true} />
           <div className="w-10" />
@@ -149,26 +167,26 @@ export default function SettingsPage() {
         {/* ── Active Privy Wallet Address ── */}
         <section className="mb-4">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-white/50 uppercase tracking-wider">
-              Connected Wallet Address
+            <p className="text-xs font-semibold text-white/55">
+              Connected account
             </p>
-            <span className="text-[10px] font-semibold text-[#836EF9] bg-[#836EF9]/10 px-2 py-0.5 rounded-full border border-[#836EF9]/30">
-              {authenticated ? "Privy Session Active" : "Not Connected"}
+            <span className="text-[10px] font-semibold text-white/50">
+              {authenticated ? "Signed in" : "Not connected"}
             </span>
           </div>
 
-          <div className="bg-[#161224]/90 border border-[#2A2242] rounded-2xl p-4 shadow-sm">
+          <div className="border-y border-white/10 py-4">
             {authenticated && activeAddress ? (
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse shrink-0" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] shrink-0" />
                   <p className="text-white/80 font-mono text-xs truncate">
                     {activeAddress}
                   </p>
                 </div>
                 <button
                   onClick={handleCopyAddress}
-                  className="shrink-0 w-8 h-8 rounded-lg bg-[#836EF9]/15 hover:bg-[#836EF9]/25 flex items-center justify-center transition-colors text-[#836EF9]"
+                  className="shrink-0 p-1 text-white/50 hover:text-white transition-colors"
                   title="Copy Address"
                 >
                   {copiedAddress ? (
@@ -185,7 +203,7 @@ export default function SettingsPage() {
                 </p>
                 <button
                   onClick={login}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#A0055D] text-white text-xs font-bold shadow-[0_2px_12px_rgba(131,110,249,0.35)] hover:opacity-95 transition-opacity"
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-[#836EF9]/60 text-[#C5BCFF] text-xs font-semibold hover:bg-[#836EF9]/10 transition-colors"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>Connect / Sign In</span>
@@ -197,10 +215,10 @@ export default function SettingsPage() {
 
         {authenticated && activeAddress && (
           <section className="mb-4">
-            <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-              JANUS Username
+            <p className="mb-2 text-xs font-semibold text-white/55">
+              JANUS username
             </p>
-            <div className="bg-[#161224]/90 border border-[#2A2242] rounded-2xl p-4 shadow-sm">
+            <div className="border-y border-white/10 py-4">
               <p className="text-xs text-white/50 mb-2">Use this name when inviting you to a split.</p>
               <div className="flex items-center gap-2">
                 <span className="text-[#836EF9] font-bold">@</span>
@@ -210,12 +228,12 @@ export default function SettingsPage() {
                   readOnly={Boolean(registeredUsername)}
                   placeholder="your_username"
                   maxLength={20}
-                  className="flex-1 bg-[#0B0813] border border-[#2A2242] rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-[#836EF9]"
+                  className="flex-1 bg-transparent border-b border-white/15 px-1 py-2 text-sm text-white outline-none focus:border-[#836EF9]"
                 />
                 <button
                   onClick={handleSaveUsername}
                   disabled={isSavingUsername || Boolean(registeredUsername) || username.length < 3}
-                  className="px-3 py-2 rounded-xl bg-[#836EF9]/20 text-[#A78BFA] text-xs font-bold disabled:opacity-40"
+                  className="px-3 py-2 text-[#C5BCFF] text-xs font-semibold disabled:opacity-40"
                 >
                   {isSavingUsername ? "Saving" : "Save"}
                 </button>
@@ -227,11 +245,11 @@ export default function SettingsPage() {
         )}
 
         {/* ── Deployed Contracts on Monad Testnet ── */}
-        <section className="mb-4">
-          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-            On-Chain Deployments (Monad Testnet)
-          </p>
-          <div className="bg-[#161224]/90 border border-[#2A2242] rounded-2xl p-4 space-y-3 shadow-sm text-xs">
+        <details className="mb-6 border-t border-white/10 pt-4 text-xs">
+          <summary className="cursor-pointer list-none font-semibold text-white/45 hover:text-white/70">
+            Network details
+          </summary>
+          <div className="mt-4 space-y-3 text-xs">
             <div>
               <span className="text-white/40 block mb-0.5">
                 JanusSplit Settler Contract
@@ -258,7 +276,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="pt-2 border-t border-[#2A2242]/60">
+            <div className="pt-3 border-t border-white/10">
               <span className="text-white/40 block mb-0.5">
                 Agora AUSD Token (6 decimals)
               </span>
@@ -272,7 +290,7 @@ export default function SettingsPage() {
               </a>
             </div>
 
-            <div className="pt-2 border-t border-[#2A2242]/60">
+            <div className="pt-3 border-t border-white/10">
               <span className="text-white/40 block mb-0.5">
                 Agora Faucet Contract
               </span>
@@ -286,64 +304,72 @@ export default function SettingsPage() {
               </a>
             </div>
           </div>
-        </section>
+        </details>
 
         {/* ── Actions ── */}
         <section className="mb-4">
-          <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-            Wallet & Faucet Actions
+          <p className="mb-2 text-xs font-semibold text-white/55">
+            Account actions
           </p>
-          <div className="bg-[#161224]/90 border border-[#2A2242] rounded-2xl overflow-hidden divide-y divide-[#2A2242] shadow-sm">
+          <div className="divide-y divide-white/10 border-y border-white/10">
             {/* Claim Faucet Button */}
             <button
               onClick={handleClaimFaucet}
               disabled={isClaimingFaucet}
-              className="w-full flex items-center justify-between p-4 hover:bg-[#1E1833]/60 transition-colors text-left"
+              className="flex w-full items-center justify-between gap-6 py-3.5 text-left transition-colors hover:bg-white/[0.02]"
             >
-              <div className="flex items-center gap-3">
-                <Droplets className="w-4 h-4 text-[#10B981]" />
-                <div>
-                  <span className="text-sm font-medium text-white block">
-                    Claim 10,000 Agora AUSD
+              <div className="min-w-0">
+                  <span className="block text-sm font-medium text-white">
+                    Add test funds
                   </span>
-                  <span className="text-[10px] text-white/40">
-                    Direct on-chain faucet drip to your address
+                  <span className="mt-0.5 block text-xs text-white/40">
+                    Receive 10,000 AUSD for testing
                   </span>
-                </div>
               </div>
               {isClaimingFaucet ? (
                 <Loader2 className="w-4 h-4 text-[#10B981] animate-spin" />
               ) : faucetMsg ? (
-                <span className="text-xs font-bold text-[#10B981]">
+                <span className="shrink-0 text-xs font-medium text-[#10B981]">
                   {faucetMsg}
                 </span>
               ) : (
-                <span className="text-xs font-bold text-[#10B981] bg-[#10B981]/15 px-2 py-1 rounded-lg">
-                  Claim
+                <span className="shrink-0 text-xs font-semibold text-[#A78BFA]">
+                  Add funds
                 </span>
               )}
             </button>
+            {faucetErrorMsg && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-xs leading-5 text-amber-300">
+                <span>{faucetErrorMsg}</span>
+                {faucetErrorMsg === MON_GAS_REQUIRED_MESSAGE && (
+                  <a
+                    href="https://faucet.monad.xyz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-[#A78BFA] underline underline-offset-2 hover:text-white"
+                  >
+                    Get testnet MON ↗
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* Privy Login / Disconnect */}
             {authenticated ? (
               <button
                 onClick={logout}
-                className="w-full flex items-center justify-between p-4 hover:bg-[#1E1833]/60 transition-colors text-left text-[#A0055D]"
+                className="flex w-full items-center justify-between py-3.5 text-left text-red-300/75 transition-colors hover:text-red-300"
               >
-                <div className="flex items-center gap-3">
-                  <LogOut className="w-4 h-4" />
-                  <span className="text-sm font-medium">Disconnect Wallet</span>
-                </div>
+                <span className="text-sm font-medium">Disconnect account</span>
+                <LogOut className="h-4 w-4" />
               </button>
             ) : (
               <button
                 onClick={login}
-                className="w-full flex items-center justify-between p-4 hover:bg-[#1E1833]/60 transition-colors text-left text-[#836EF9]"
+                className="flex w-full items-center justify-between py-3.5 text-left text-[#A78BFA] transition-colors hover:text-white"
               >
-                <div className="flex items-center gap-3">
-                  <LogIn className="w-4 h-4" />
-                  <span className="text-sm font-medium">Connect with Privy</span>
-                </div>
+                <span className="text-sm font-medium">Connect account</span>
+                <LogIn className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -353,7 +379,7 @@ export default function SettingsPage() {
       {/* Build info */}
       <div className="text-center mt-6">
         <p className="text-white/30 text-xs">
-          Janus v0.1.0 · Monad Metropolis Hackathon 2026
+          JANUS Consumer Payments
         </p>
       </div>
     </main>

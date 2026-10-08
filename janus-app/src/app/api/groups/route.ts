@@ -7,6 +7,11 @@ const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_BODY_BYTES = 16_384;
 
+function missingGroupsSchema(error: unknown) {
+  const value = error as { code?: string; message?: string };
+  return value?.code === "PGRST205" || value?.message?.includes("group_id");
+}
+
 async function authenticatedAddress(req: Request, address: string | null) {
   const user = await authenticatePrivyRequest(req);
   if (!user || !address || !ADDRESS_PATTERN.test(address) || !walletBelongsToUser(user, address)) return null;
@@ -37,6 +42,12 @@ export async function GET(req: Request) {
     return NextResponse.json({ success: true, groups: await getUserGroups(auth.address) });
   } catch (error) {
     console.error("GET /api/groups failed:", error);
+    if (missingGroupsSchema(error)) {
+      return NextResponse.json(
+        { success: false, error: "Groups need Supabase migration 008 before they can be used" },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ success: false, error: "Failed to load groups" }, { status: 500 });
   }
 }
@@ -84,6 +95,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, group }, { status: 201 });
   } catch (error) {
     console.error("POST /api/groups failed:", error);
+    if (missingGroupsSchema(error)) {
+      return NextResponse.json(
+        { success: false, error: "Groups need Supabase migration 008 before they can be used" },
+        { status: 503 }
+      );
+    }
     if ((error as { code?: string }).code === "23505") {
       return NextResponse.json({ success: false, error: "You already have a group with that name" }, { status: 409 });
     }

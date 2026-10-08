@@ -9,17 +9,15 @@ import {
   Trash2,
   Copy,
   Check,
-  QrCode as QrIcon,
   Loader2,
   ExternalLink,
-  Users,
   CheckCircle2,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { JanusLogo } from "@/components/JanusLogo";
 import { usePrivy, useSendTransaction } from "@privy-io/react-auth";
 import { encodeFunctionData, formatUnits, isAddress, keccak256, parseUnits, toHex } from "viem";
-import { NEW_SPLIT_CONTRACT_ADDRESS, JANUS_SPLIT_ABI, ensureGas, publicClient } from "@/lib/web3";
+import { NEW_SPLIT_CONTRACT_ADDRESS, JANUS_SPLIT_ABI, ensureGas, MON_GAS_REQUIRED_MESSAGE, publicClient } from "@/lib/web3";
 import { getServerAuthHeaders, saveLocalSplit, saveLocalActivity } from "@/lib/activityStore";
 import { describeError } from "@/lib/errors";
 import { currentTimestamp, newSplitSeed } from "@/lib/time";
@@ -226,7 +224,7 @@ function SplitPageContent() {
       const idBytes32 = keccak256(toHex(rawId));
 
       // Ensure user has MON gas
-      await ensureGas(activeAddress);
+      if (!(await ensureGas(activeAddress))) throw new Error(MON_GAS_REQUIRED_MESSAGE);
 
       // Encode createSplit call on JanusSplit contract
       const callData = encodeFunctionData({
@@ -305,10 +303,10 @@ function SplitPageContent() {
   }
 
   const currentSplitId = createdSplitId || "split-preview";
-  const shareUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/pay/${currentSplitId}`
-      : `/pay/${currentSplitId}`;
+  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  const shareBaseUrl = configuredAppUrl || (typeof window !== "undefined" ? window.location.origin : "");
+  const shareUrl = `${shareBaseUrl}/pay/${currentSplitId}`;
+  const isLocalShareUrl = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i.test(shareUrl);
 
   function handleCopy() {
     navigator.clipboard.writeText(shareUrl).then(() => {
@@ -318,57 +316,58 @@ function SplitPageContent() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0813] text-white px-5 pt-7 pb-12 max-w-md mx-auto relative flex flex-col justify-between">
+    <main className="min-h-screen bg-[#0B0813] text-white px-5 pt-7 pb-16 max-w-xl mx-auto relative flex flex-col justify-between">
       <div>
         {/* ── Top Header ── */}
-        <header className="flex items-center gap-3.5 mb-5">
+        <header className="flex items-center gap-4 border-b border-white/10 pb-5 mb-7">
           <Link
-            href="/"
-            className="w-9 h-9 rounded-full bg-[#161224] border border-[#2A2242] flex items-center justify-center hover:border-[#836EF9]/50 transition-colors shadow-sm"
+            href="/wallet"
+            className="inline-flex items-center gap-2 py-2 text-sm text-white/55 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4 text-white/80" />
+            <span>Wallet</span>
           </Link>
           <div className="flex-1">
-            <h1 className="text-lg font-bold text-white tracking-tight">
-              Create Split Bill
+            <h1 className="text-lg font-semibold text-white tracking-tight">
+              Create a split
             </h1>
           </div>
           <JanusLogo size={32} showText={false} />
         </header>
 
         {groupName && (
-          <div className="mb-4 rounded-2xl bg-[#836EF9]/10 border border-[#836EF9]/25 px-4 py-3">
+          <div className="mb-5 border-l-2 border-[#836EF9] pl-3 py-1">
             <p className="text-xs text-[#C4B5FD]">Creating a split for</p>
             <p className="text-sm font-bold text-white mt-0.5">{groupName}</p>
           </div>
         )}
         {groupLoadError && (
-          <div className="mb-4 rounded-2xl bg-red-500/10 border border-red-500/25 px-4 py-3 text-xs text-red-200">
+          <div className="mb-5 border-l-2 border-red-400 pl-3 py-1 text-xs text-red-200">
             {groupLoadError}
           </div>
         )}
 
         {/* ── Bill Title & Total Amount Input Card ── */}
-        <div className="bg-[#161224]/90 border border-[#2A2242] rounded-3xl p-5 mb-5 shadow-[0_8px_32px_rgba(0,0,0,0.5)] space-y-4">
+        <div className="mb-6 space-y-5 border-y border-white/10 py-5">
           <div>
-            <label className="text-[11px] font-semibold text-white/50 uppercase tracking-wider block mb-1.5">
-              Bill Name / Description
+            <label className="text-xs font-medium text-white/55 block mb-2">
+              What is this for?
             </label>
             <input
               type="text"
               value={billTitle}
               onChange={(e) => setBillTitle(e.target.value)}
               placeholder="e.g. Dinner, Uber, Groceries, Hotel"
-              className="w-full bg-[#0B0813] border border-[#2A2242] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-white/20 focus:border-[#836EF9] outline-none transition-colors"
+              className="w-full bg-transparent border-b border-white/15 px-0 py-2.5 text-base text-white placeholder-white/25 focus:border-[#836EF9] outline-none transition-colors"
             />
           </div>
 
           <div>
-            <label className="text-[11px] font-semibold text-white/50 uppercase tracking-wider block mb-1.5">
-              Total Amount (AUSD)
+            <label className="text-xs font-medium text-white/55 block mb-2">
+              Total amount
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-lg font-bold text-white/40">$</span>
+              <span className="absolute left-0 text-lg font-medium text-white/35">$</span>
               <input
                 type="number"
                 step="0.01"
@@ -376,35 +375,35 @@ function SplitPageContent() {
                 value={totalBill}
                 onChange={(e) => setTotalBill(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-[#0B0813] border border-[#2A2242] rounded-xl pl-8 pr-16 py-3 text-2xl font-extrabold text-white placeholder-white/20 focus:border-[#836EF9] outline-none tabular-nums transition-colors"
+                className="w-full bg-transparent border-b border-white/15 pl-6 pr-16 py-3 text-2xl font-semibold text-white placeholder-white/20 focus:border-[#836EF9] outline-none tabular-nums transition-colors"
               />
-              <span className="absolute right-3.5 text-xs font-semibold text-[#836EF9] uppercase tracking-wider">
+              <span className="absolute right-0 text-xs font-medium text-white/40">
                 AUSD
               </span>
             </div>
           </div>
         </div>
 
-        <div className="bg-[#161224]/90 border border-[#2A2242] rounded-2xl p-1.5 mb-5 grid grid-cols-2 gap-1">
+        <div className="mb-6 grid grid-cols-2 border-b border-white/10">
           <button
             type="button"
             onClick={() => setSplitMode("named")}
-            className={`rounded-xl px-3 py-2.5 text-xs font-semibold transition-colors ${splitMode === "named" ? "bg-[#836EF9] text-white" : "text-white/50 hover:text-white"}`}
+            className={`border-b-2 px-3 py-3 text-sm font-medium transition-colors ${splitMode === "named" ? "border-[#836EF9] text-white" : "border-transparent text-white/45 hover:text-white"}`}
           >
             Named split
           </button>
           <button
             type="button"
             onClick={() => setSplitMode("open")}
-            className={`rounded-xl px-3 py-2.5 text-xs font-semibold transition-colors ${splitMode === "open" ? "bg-[#836EF9] text-white" : "text-white/50 hover:text-white"}`}
+            className={`border-b-2 px-3 py-3 text-sm font-medium transition-colors ${splitMode === "open" ? "border-[#836EF9] text-white" : "border-transparent text-white/45 hover:text-white"}`}
           >
             Open split
           </button>
         </div>
 
         {splitMode === "open" && (
-          <div className="bg-[#161224]/90 border border-[#836EF9]/40 rounded-2xl p-4 mb-5">
-            <label className="text-[11px] font-semibold text-white/60 uppercase tracking-wider block mb-1.5">
+          <div className="border-b border-white/10 pb-5 mb-5">
+            <label className="text-xs font-medium text-white/55 block mb-2">
               Payment slots
             </label>
             <input
@@ -413,7 +412,7 @@ function SplitPageContent() {
               step="1"
               value={openPayerCount}
               onChange={(e) => setOpenPayerCount(e.target.value)}
-              className="w-full bg-[#0B0813] border border-[#2A2242] rounded-xl px-3.5 py-2.5 text-lg font-bold text-white focus:border-[#836EF9] outline-none"
+              className="w-full bg-transparent border-b border-white/15 px-0 py-2.5 text-lg font-semibold text-white focus:border-[#836EF9] outline-none"
             />
             <p className="text-[11px] text-white/45 mt-2">
               Anyone with the payment link can claim one available share. Their wallet will be recorded automatically.
@@ -422,13 +421,13 @@ function SplitPageContent() {
         )}
 
         {/* ── Calculation Summary Card ── */}
-        <div className="grid grid-cols-2 gap-3 mb-5">
+        <div className="grid grid-cols-2 gap-6 mb-7 border-b border-white/10 pb-6">
           {/* Total Bill Box */}
-          <div className="bg-[#161224]/90 border border-[#2A2242] rounded-2xl p-4 text-center">
-            <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">
-              TOTAL BILL
+          <div className="border-l border-white/10 pl-4">
+            <p className="text-xs font-medium text-white/40">
+              Total bill
             </p>
-            <p className="text-2xl font-extrabold text-white tabular-nums mt-1">
+            <p className="text-2xl font-semibold text-white tabular-nums mt-1">
               ${Number(formatUnits(totalBillBaseUnits, 6)).toFixed(2)}
             </p>
             <p className="text-[10px] text-white/40 mt-0.5">
@@ -437,11 +436,11 @@ function SplitPageContent() {
           </div>
 
           {/* Per Person Share Box */}
-          <div className="bg-gradient-to-br from-[#836EF9]/20 to-[#161224] border border-[#836EF9]/40 rounded-2xl p-4 text-center shadow-[0_0_20px_rgba(131,110,249,0.15)]">
-            <p className="text-[10px] font-semibold text-[#836EF9] uppercase tracking-wider">
-              PER PERSON SHARE
+          <div className="border-l border-white/10 pl-4">
+            <p className="text-xs font-medium text-white/40">
+              Per person
             </p>
-            <p className="text-2xl font-extrabold text-[#C084FC] tabular-nums mt-1">
+            <p className="text-2xl font-semibold text-white tabular-nums mt-1">
               ${perPersonAmount}
             </p>
             <p className="text-[10px] text-white/50 mt-0.5">Each pays equally</p>
@@ -451,8 +450,7 @@ function SplitPageContent() {
         {/* ── Dynamic Participants List ── */}
         <section className="mb-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-semibold text-white/90 tracking-wide flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-[#836EF9]" />
+            <h2 className="text-sm font-semibold text-white/90 flex items-center gap-2">
               <span>{splitMode === "open" ? `Payment slots (${validOpenPayerCount ? parsedOpenPayerCount : 0})` : `Participants (${participants.length})`}</span>
             </h2>
               <span className="text-[10px] text-white/40">{splitMode === "open" ? "Anyone can pay" : "Equal Split"}</span>
@@ -471,38 +469,38 @@ function SplitPageContent() {
                   }
                 }}
                 placeholder="Add @username"
-                className="flex-1 bg-[#161224] border border-[#2A2242] rounded-xl px-3 py-2 text-xs text-white placeholder-white/30 focus:border-[#836EF9] outline-none"
+                className="flex-1 bg-transparent border-b border-white/15 px-0 py-2.5 text-sm text-white placeholder-white/30 focus:border-[#836EF9] outline-none"
               />
               <button
                 onClick={handleAddParticipant}
-                className="px-3 py-2 rounded-xl bg-[#836EF9]/20 hover:bg-[#836EF9]/30 text-[#836EF9] text-xs font-semibold flex items-center gap-1 transition-colors border border-[#836EF9]/40"
+                className="px-3 py-2 text-[#AFA3FF] text-sm font-semibold flex items-center gap-1 transition-colors hover:text-white"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{isResolvingUsername ? "Finding" : "Add"}</span>
               </button>
             </div>
           ) : (
-            <div className="mb-3 rounded-xl border border-[#2A2242] bg-[#0B0813]/60 px-3 py-3 text-xs text-white/55">
+            <div className="mb-3 border-l border-white/15 pl-3 py-1 text-xs text-white/55">
               No names are required. Share the link and the first {validOpenPayerCount ? parsedOpenPayerCount : "—"} wallets can pay.
             </div>
           )}
 
           {/* Participants list */}
-          <div className="bg-[#161224]/90 border border-[#2A2242] rounded-2xl divide-y divide-[#2A2242]/70 overflow-hidden shadow-sm">
+          <div className="divide-y divide-white/10 border-y border-white/10">
             {participants.map((p) => (
               <div
                 key={p.id}
-                className="flex items-center justify-between p-3.5 hover:bg-[#1E1833]/50 transition-colors"
+                className="flex items-center justify-between py-4 hover:bg-white/[0.02] transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#836EF9] to-[#C084FC] flex items-center justify-center text-xs font-bold text-white shrink-0">
+                  <div className="w-8 h-8 border border-white/15 flex items-center justify-center text-xs font-semibold text-white/75 shrink-0">
                     {p.name.slice(0, 1).toUpperCase()}
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white flex items-center gap-2">
                       <span>{p.name}</span>
                       {p.isOwner && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] font-semibold">
+                        <span className="text-[10px] text-[#10B981] font-medium">
                           Organizer
                         </span>
                       )}
@@ -533,17 +531,16 @@ function SplitPageContent() {
         <button
           onClick={handleCreateSplit}
           disabled={isCreating}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#38BDF8] via-[#836EF9] to-[#C084FC] text-white font-bold text-sm tracking-wider uppercase shadow-[0_0_24px_rgba(131,110,249,0.5)] hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full py-3.5 rounded-lg bg-[#836EF9] text-white font-semibold text-sm hover:bg-[#927fff] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isCreating ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Broadcasting to Monad Testnet…</span>
+              <span>Creating split…</span>
             </>
           ) : (
             <>
-              <QrIcon className="w-4 h-4" />
-              <span>CONFIRM & CREATE SPLIT ON MONAD</span>
+              <span>Create split</span>
             </>
           )}
         </button>
@@ -552,7 +549,7 @@ function SplitPageContent() {
       {/* ── Real Deep-link QR & Share Modal ── */}
       {showQrModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#161224] border border-[#2A2242] rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+          <div className="relative w-full max-w-sm rounded-xl border border-white/15 bg-[#13101D] p-6 text-center">
             <button
               onClick={() => setShowQrModal(false)}
               className="absolute top-4 right-4 text-white/40 hover:text-white"
@@ -560,9 +557,7 @@ function SplitPageContent() {
               ✕
             </button>
 
-            <div className="w-12 h-12 rounded-full bg-[#10B981]/15 text-[#10B981] flex items-center justify-center mx-auto mb-3">
-              <CheckCircle2 className="w-6 h-6" />
-            </div>
+            <CheckCircle2 className="mx-auto mb-3 h-6 w-6 text-[#10B981]" />
 
             <h3 className="text-lg font-bold text-white mb-0.5">{billTitle}</h3>
             <p className="text-xs text-[#836EF9] font-semibold mb-4">
@@ -570,7 +565,7 @@ function SplitPageContent() {
             </p>
 
             {/* Real QR Code linking to payer page */}
-            <div className="w-48 h-48 bg-white rounded-2xl p-3 mx-auto mb-4 flex items-center justify-center shadow-[0_0_32px_rgba(131,110,249,0.3)]">
+            <div className="mx-auto mb-4 flex h-48 w-48 items-center justify-center rounded-lg bg-white p-3">
               <QRCodeSVG
                 value={shareUrl}
                 size={168}
@@ -587,7 +582,7 @@ function SplitPageContent() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-[11px] text-[#836EF9] hover:underline mb-3"
               >
-                <span>View On MonadScan: {txHash.slice(0, 10)}…{txHash.slice(-6)}</span>
+                <span>View transaction ↗</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
             )}
@@ -595,8 +590,13 @@ function SplitPageContent() {
             <p className="text-white/40 text-xs mb-3">
               Share payment link or scan QR code with any device
             </p>
+            {isLocalShareUrl && (
+              <p className="mb-4 text-left text-xs leading-5 text-amber-200/80">
+                This development QR points to localhost and only opens on this computer. On Vercel it automatically uses your public domain.
+              </p>
+            )}
             {indexingError && (
-              <div className="mb-4 rounded-xl border border-amber-400/40 bg-amber-400/10 p-3 text-xs text-amber-200">
+              <div className="mb-4 border-l-2 border-amber-400/50 pl-3 text-left text-xs text-amber-200">
                 <p>Split confirmed on Monad, but JANUS history has not synced it. Retry before sharing the link.</p>
                 <p className="mt-1">{indexingError}</p>
                 <button onClick={retrySplitIndex} disabled={isRetryingIndex} className="mt-2 underline disabled:opacity-50">
@@ -605,13 +605,13 @@ function SplitPageContent() {
               </div>
             )}
 
-            <div className="flex items-center gap-2 bg-[#0B0813] border border-[#2A2242] rounded-xl p-2.5 mb-4">
+            <div className="mb-4 flex items-center gap-2 border-b border-white/15 py-2.5">
               <p className="text-white/60 text-xs font-mono truncate flex-1 text-left">
                 {shareUrl}
               </p>
               <button
                 onClick={handleCopy}
-                className="p-1.5 rounded-lg bg-[#836EF9]/15 text-[#836EF9] hover:bg-[#836EF9]/25 transition-colors shrink-0"
+                className="shrink-0 p-1.5 text-[#A78BFA] transition-colors hover:text-white"
                 title="Copy share link"
               >
                 {copied ? (
@@ -625,22 +625,22 @@ function SplitPageContent() {
             <div className="grid grid-cols-2 gap-2 mb-2">
               <Link
                 href={`/pay/${currentSplitId}`}
-                className="py-3 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#A0055D] text-white font-bold text-xs flex items-center justify-center shadow-[0_2px_12px_rgba(131,110,249,0.35)]"
+                className="flex items-center justify-center rounded-lg bg-[#836EF9] py-3 text-xs font-semibold text-white hover:bg-[#927fff]"
               >
-                Test Payer View
+                Open payment page
               </Link>
               <button
                 onClick={() => setShowQrModal(false)}
-                className="py-3 rounded-xl bg-[#0B0813] border border-[#2A2242] text-white/70 hover:text-white font-semibold text-xs"
+                className="border-b border-white/20 py-3 text-xs font-semibold text-white/70 hover:text-white"
               >
                 Close
               </button>
             </div>
             <Link
-              href="/"
-              className="w-full py-2.5 rounded-xl bg-[#161224] border border-[#2A2242] text-white/90 hover:text-white font-medium text-xs flex items-center justify-center transition-colors hover:border-[#836EF9]/40"
+              href="/wallet"
+              className="flex w-full items-center justify-center py-2.5 text-xs font-medium text-[#A78BFA] transition-colors hover:text-white"
             >
-              View in Wallet Activity
+              Return to wallet
             </Link>
           </div>
         </div>

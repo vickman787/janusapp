@@ -91,7 +91,7 @@ export function JanusLogo({
     <div className={`flex items-center gap-2.5 ${className}`}>
       {/* ── Dual-Face Emblem ── */}
       <div
-        className="relative shrink-0 flex items-center justify-center rounded-xl bg-[#161224] border border-[#836EF9]/40 shadow-[0_0_16px_rgba(131,110,249,0.35)] p-1 overflow-hidden"
+        className="relative shrink-0 flex items-center justify-center rounded-lg bg-[#161224] border border-white/15 p-1 overflow-hidden"
         style={{ width: size, height: size }}
       >
         <svg

@@ -5,6 +5,20 @@ import { recoverMessageAddress } from "viem";
 import { profileProofMessage } from "@/lib/profileProof";
 import { rateLimitHeaders, rateLimitRequest } from "@/lib/rateLimit";
 
+function describeProfileError(error: unknown) {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const value = error as Record<string, unknown>;
+    return JSON.stringify({
+      message: value.message,
+      code: value.code,
+      details: value.details,
+      hint: value.hint,
+    });
+  }
+  return String(error);
+}
+
 const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
 const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/;
 
@@ -26,7 +40,7 @@ export async function GET(req: Request) {
     // protected below by a verified Privy session plus wallet signature.
     return NextResponse.json({ success: true, profile: await getProfile(address) });
   } catch (error) {
-    console.error("GET /api/profiles failed:", error);
+    console.error("GET /api/profiles failed:", describeProfileError(error));
     return NextResponse.json({ success: false, error: "Failed to load profile" }, { status: 500 });
   }
 }
@@ -75,7 +89,7 @@ export async function PUT(req: Request) {
     }
     return NextResponse.json({ success: true, profile: await saveProfile(address, normalizedUsername) });
   } catch (error) {
-    console.error("PUT /api/profiles failed:", error);
+    console.error("PUT /api/profiles failed:", describeProfileError(error));
     if (error instanceof Error && error.message === "Username or wallet is already registered") {
       return NextResponse.json({ success: false, error: "Username or wallet is already registered" }, { status: 409 });
     }

@@ -24,6 +24,9 @@ create table if not exists public.group_members (
 create index if not exists group_members_wallet_idx
   on public.group_members (wallet_address);
 
+alter table public.groups enable row level security;
+alter table public.group_members enable row level security;
+
 alter table public.splits
   add column if not exists group_id uuid references public.groups(id) on delete set null;
 

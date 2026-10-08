@@ -12,6 +12,14 @@ export function BottomNav() {
   const { authenticated, user } = usePrivy();
   const activeAddress = user?.wallet?.address;
   const [pendingCount, setPendingCount] = useState(0);
+  const [currentHash, setCurrentHash] = useState("");
+
+  useEffect(() => {
+    const syncHash = () => setCurrentHash(window.location.hash);
+    queueMicrotask(syncHash);
+    window.addEventListener("hashchange", syncHash);
+    return () => window.removeEventListener("hashchange", syncHash);
+  }, [pathname]);
 
   const refreshInboxCount = useCallback(async () => {
     if (!activeAddress) {
@@ -29,11 +37,11 @@ export function BottomNav() {
 
   useEffect(() => {
     if (!authenticated || !activeAddress) {
-      setPendingCount(0);
+      queueMicrotask(() => setPendingCount(0));
       return;
     }
 
-    void refreshInboxCount();
+    queueMicrotask(() => void refreshInboxCount());
     const onFocus = () => void refreshInboxCount();
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") void refreshInboxCount();
@@ -52,41 +60,42 @@ export function BottomNav() {
   }, [authenticated, activeAddress, refreshInboxCount]);
 
   const navItems = [
-    { label: "Wallet", href: "/", icon: Wallet },
-    { label: "Activity", href: "/#activity", icon: Activity },
+    { label: "Wallet", href: "/wallet", icon: Wallet },
+    { label: "Activity", href: "/wallet#activity", icon: Activity },
     { label: "Inbox", href: "/inbox", icon: Inbox },
     { label: "Groups", href: "/groups", icon: Users },
     { label: "Settings", href: "/settings", icon: Settings },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 max-w-md mx-auto px-4 pb-5 pt-2">
-      <div className="bg-[#161224]/90 backdrop-blur-xl border border-[#2A2242] rounded-2xl p-2 flex items-center justify-around shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md px-4 pb-5 pt-2">
+      <div className="flex items-center justify-around rounded-2xl border border-white/10 bg-[#161224]/95 p-2 shadow-[0_10px_30px_rgba(0,0,0,0.42)] backdrop-blur-xl">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(item.href.split("#")[0]) && item.href !== "/";
+          const isActive = item.label === "Wallet"
+            ? pathname === "/wallet" && currentHash !== "#activity"
+            : item.label === "Activity"
+              ? pathname === "/wallet" && currentHash === "#activity"
+              : pathname.startsWith(item.href);
 
           return (
             <Link
               key={item.label}
               href={item.href}
-              className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all ${
+              className={`relative flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 transition-colors ${
                 isActive
-                  ? "text-[#836EF9] font-semibold"
+                  ? "text-[#A78BFA] font-semibold"
                   : "text-white/40 hover:text-white/80"
               }`}
             >
               <span className="relative">
                 <Icon
-                  className={`w-5 h-5 transition-transform ${
-                    isActive ? "scale-110 stroke-[2.5]" : "stroke-[1.75]"
+                  className={`w-5 h-5 ${
+                    isActive ? "stroke-[2.25]" : "stroke-[1.75]"
                   }`}
                 />
                 {item.label === "Inbox" && pendingCount > 0 && (
-                  <span className="absolute -top-2 -right-3 min-w-4 h-4 px-1 rounded-full bg-[#F59E0B] text-[#0B0813] text-[9px] font-black leading-4 text-center ring-2 ring-[#161224]">
+                  <span className="absolute -right-3 -top-2 min-w-4 rounded-full bg-[#F59E0B] px-1 text-center text-[9px] font-bold leading-4 text-[#0B0813]">
                     {pendingCount > 99 ? "99+" : pendingCount}
                   </span>
                 )}

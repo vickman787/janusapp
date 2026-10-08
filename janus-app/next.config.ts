@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Keep local development scoped to this app when the parent workspace also
+  // contains a lockfile.
+  turbopack: {
+    root: __dirname,
+  },
+
   // Output mode for Vercel
   output: "standalone",
 

@@ -40,6 +40,13 @@ export const AGORA_FAUCET_ADDRESS = (process.env
   .NEXT_PUBLIC_AGORA_FAUCET_ADDRESS ||
   "0xd236c18D274E54FAccC3dd9DDA4b27965a73ee6C") as `0x${string}`;
 
+export const AGORA_FAUCET_ABI = parseAbi([
+  "function requestFunds(address recipient) external",
+]);
+
+export const MON_GAS_REQUIRED_MESSAGE =
+  "You need a small amount of Monad testnet MON for the network fee before claiming AUSD.";
+
 export const ERC20_ABI = parseAbi([
   "function balanceOf(address account) external view returns (uint256)",
   "function decimals() external view returns (uint8)",
@@ -88,24 +95,15 @@ export async function fetchOnchainAusdBalance(address: string): Promise<string> 
   }
 }
 
-/**
- * Automatically checks native MON gas balance and requests faucet gas if needed
- */
-export async function ensureGas(address?: string) {
-  if (!address || !address.startsWith("0x")) return;
+/** Check whether the wallet has any native MON available for network fees. */
+export async function ensureGas(address?: string): Promise<boolean> {
+  if (!address || !address.startsWith("0x")) return false;
   try {
     const bal = await publicClient.getBalance({ address: address as `0x${string}` });
-    // If user has less than 0.005 MON, trigger faucet drip for testnet gas
-    const minThreshold = BigInt("5000000000000000");
-    if (bal < minThreshold) {
-      await fetch("/api/faucet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address }),
-      });
-    }
+    return bal > 0n;
   } catch (err) {
     console.warn("ensureGas check warning:", err);
+    return false;
   }
 }
 

@@ -6,6 +6,7 @@ import {
   getUserSplits,
   getUserGroup,
   saveActivity,
+  reconcileStoredSplit,
 } from "@/lib/serverStore";
 import {
   JANUS_SPLIT_ABI,
@@ -155,7 +156,7 @@ export async function POST(req: Request) {
     const group = groupId && UUID_PATTERN.test(groupId)
       ? await getUserGroup(groupId, created.requester)
       : null;
-    const saved = await saveSplit({
+    let saved = await saveSplit({
       splitId: created.splitId,
       title: created.memo || "Bill Split",
       totalAmount,
@@ -185,6 +186,26 @@ export async function POST(req: Request) {
         ).values()
       ),
     });
+
+    // A retry may be indexing a split that has already received every share.
+    // Reconcile the authoritative aggregate state even when individual legacy
+    // payment receipts were never stored by an older deployment.
+    const onchain = (await serverPublicClient.readContract({
+      address: createdContractAddress || JANUS_SPLIT_ADDRESS,
+      abi: JANUS_SPLIT_ABI,
+      functionName: "getSplit",
+      args: [created.splitId],
+    })) as { settledCount: bigint; status: number };
+    const reconciledStatus = onchain.status === 1
+      ? "Settled"
+      : onchain.status === 2
+        ? "Cancelled"
+        : "Active";
+    saved = (await reconcileStoredSplit(
+      created.splitId,
+      Number(onchain.settledCount),
+      reconciledStatus
+    )) || saved;
 
     await saveActivity({
       id: `10143:${txHash.toLowerCase()}:created`,

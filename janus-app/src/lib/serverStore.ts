@@ -179,7 +179,7 @@ export async function saveSplit(split: SplitRecordData): Promise<SplitRecordData
   const existing = await getSplit(splitId);
   if (existing) return existing;
 
-  const { error } = await supabaseAdmin.from("splits").insert({
+  const splitRow = {
     split_id: splitId,
     contract_address: split.contractAddress?.toLowerCase(),
     title: split.title,
@@ -191,8 +191,9 @@ export async function saveSplit(split: SplitRecordData): Promise<SplitRecordData
     created_at: split.createdAt,
     status: split.status,
     settled_count: split.settledCount || 0,
-    group_id: split.groupId || null,
-  });
+    ...(split.groupId ? { group_id: split.groupId } : {}),
+  };
+  const { error } = await supabaseAdmin.from("splits").insert(splitRow);
   if (error && error.code !== "23505") throw error;
 
   if (split.payers?.length) {
@@ -418,6 +419,19 @@ export async function cancelStoredSplit(splitId: string): Promise<SplitRecordDat
     .maybeSingle();
   if (error) throw error;
   return data ? hydrateSplit(data as SplitRow) : null;
+}
+
+export async function reconcileStoredSplit(
+  splitId: string,
+  settledCount: number,
+  status: SplitRecordData["status"]
+): Promise<SplitRecordData | null> {
+  const { error } = await supabaseAdmin
+    .from("splits")
+    .update({ settled_count: settledCount, status })
+    .eq("split_id", splitId.toLowerCase());
+  if (error) throw error;
+  return getSplit(splitId);
 }
 
 export async function getUserSplits(address: string): Promise<SplitRecordData[]> {
