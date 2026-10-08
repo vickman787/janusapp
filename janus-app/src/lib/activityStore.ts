@@ -37,6 +37,8 @@ export interface ActivityItem {
   id: string;
   from?: string; // Address performing the action (Sender / Payer)
   to?: string;   // Address receiving the action (Recipient / Organizer)
+  fromLabel?: string;
+  toLabel?: string;
   address?: string;
   counterparty?: string;
   type: "split_created" | "split_paid" | "send" | "faucet" | "received" | "transfer";
@@ -119,6 +121,8 @@ export function resolveActivityForViewer(
   // 3. Split Paid
   if (item.type === "split_paid") {
     const isPayer = from === viewer;
+    const payerLabel = item.fromLabel || shorten(from);
+    const organizerLabel = item.toLabel || shorten(to);
     if (isPayer) {
       return {
         direction: "split_paid",
@@ -127,8 +131,8 @@ export function resolveActivityForViewer(
         performerAddress: from,
         performerLabel: "You",
         recipientAddress: to,
-        recipientLabel: `Organizer (${shorten(to)})`,
-        actionText: `Paid by You → ${shorten(to)}`,
+        recipientLabel: `Organizer (${organizerLabel})`,
+        actionText: `Paid by You → ${organizerLabel}`,
         isPositive: false,
         amountDisplay: `-$${item.amount}`,
         date: item.date,
@@ -142,10 +146,10 @@ export function resolveActivityForViewer(
         badge: "RECEIVED",
         title: `Share Received for ${item.title || "Bill"}`,
         performerAddress: from,
-        performerLabel: shorten(from),
+        performerLabel: payerLabel,
         recipientAddress: to,
         recipientLabel: "You",
-        actionText: `Paid by ${shorten(from)} → You`,
+        actionText: `Paid by ${payerLabel} → You`,
         isPositive: true,
         amountDisplay: `+$${item.amount}`,
         date: item.date,
@@ -355,13 +359,13 @@ export async function fetchUserActivities(
     const counterparties = Array.from(
       new Set(
         merged
-          .filter((item) => item.type === "send" || item.type === "received")
-          .map((item) =>
-            (item.type === "send"
-              ? item.to || item.counterparty
-              : item.from || ""
-            )?.toLowerCase() || ""
-          )
+          .flatMap((item) => {
+            if (item.type === "send") return [item.to || item.counterparty || ""];
+            if (item.type === "received") return [item.from || ""];
+            if (item.type === "split_paid") return [item.from || item.address || "", item.to || item.counterparty || ""];
+            return [];
+          })
+          .map((address) => address.toLowerCase())
           .filter(Boolean)
       )
     );
@@ -379,6 +383,8 @@ export async function fetchUserActivities(
       })
     );
     for (const item of merged) {
+      item.fromLabel = labels.get((item.from || item.address || "").toLowerCase());
+      item.toLabel = labels.get((item.to || item.counterparty || "").toLowerCase());
       if (item.type === "send") {
         const label = labels.get((item.to || item.counterparty || "").toLowerCase());
         if (label) item.title = `Sent to ${label}`;

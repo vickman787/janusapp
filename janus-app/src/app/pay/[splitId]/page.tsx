@@ -75,6 +75,8 @@ export default function PayPage() {
   const [splitLoadError, setSplitLoadError] = useState<string | null>(null);
   const [payerAlreadySettled, setPayerAlreadySettled] = useState(false);
   const [isRetryingIndex, setIsRetryingIndex] = useState(false);
+  const [organizerUsername, setOrganizerUsername] = useState<string | null>(null);
+  const [payerUsername, setPayerUsername] = useState<string | null>(null);
 
   const linkedWalletAddress = user?.wallet?.address?.toLowerCase();
   const payerWallet =
@@ -85,9 +87,45 @@ export default function PayPage() {
   const amount = split ? formatUnits(split.amountPerPayer, 6) : "0";
   const memo = split?.memo || "Bill Settlement";
   const organizer = split?.requester || "";
-  const organizerDisplay = organizer
-    ? `${organizer.slice(0, 6)}…${organizer.slice(-4)}`
-    : "Split Organizer";
+  const organizerDisplay = organizerUsername
+    ? `@${organizerUsername}`
+    : organizer
+      ? `${organizer.slice(0, 6)}…${organizer.slice(-4)}`
+      : "Split Organizer";
+  const payerDisplay = payerUsername
+    ? `@${payerUsername}`
+    : payerAddress
+      ? `${payerAddress.slice(0, 6)}…${payerAddress.slice(-4)}`
+      : "Connect wallet to settle";
+
+  useEffect(() => {
+    let active = true;
+
+    async function resolveUsername(address: string | undefined) {
+      if (!address) return null;
+      try {
+        const response = await fetch(`/api/profiles?address=${encodeURIComponent(address)}`);
+        if (!response.ok) return null;
+        const profile = (await response.json()).profile;
+        return typeof profile?.username === "string" ? profile.username : null;
+      } catch {
+        return null;
+      }
+    }
+
+    Promise.all([
+      resolveUsername(organizer || undefined),
+      resolveUsername(payerAddress),
+    ]).then(([nextOrganizerUsername, nextPayerUsername]) => {
+      if (!active) return;
+      setOrganizerUsername(nextOrganizerUsername);
+      setPayerUsername(nextPayerUsername);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [organizer, payerAddress]);
 
   async function indexPayment(hash: string): Promise<void> {
     const response = await fetch("/api/splits/pay", {
@@ -476,9 +514,7 @@ export default function PayPage() {
               Payment request
             </h2>
             <p className="text-xs text-white/40 font-mono mt-0.5">
-              {payerAddress
-                ? `${payerAddress.slice(0, 6)}…${payerAddress.slice(-4)}`
-                : "Connect wallet to settle"}
+              {payerDisplay}
             </p>
           </div>
           <span className="text-[10px] text-white/35">Testnet</span>
