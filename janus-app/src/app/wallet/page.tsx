@@ -795,9 +795,11 @@ export default function DashboardPage() {
                   availableMissingReceipts
                 );
                 const payerCounts = new Map<string, number>();
+                const payerUsernames = new Map<string, string>();
                 for (const payer of s.payers || []) {
                   const key = payer.address.toLowerCase();
                   payerCounts.set(key, (payerCounts.get(key) || 0) + 1);
+                  if (payer.username) payerUsernames.set(key, payer.username);
                 }
                 return (
                   <div key={s.splitId} className="py-4">
@@ -822,7 +824,9 @@ export default function DashboardPage() {
                         {Array.from(payerCounts.entries()).map(([address, count], index) => (
                           <span key={address}>
                             {index > 0 ? ", " : ""}
-                            {expectedParticipants.find((participant) => participant.address.toLowerCase() === address)?.name || `${address.slice(0, 6)}…${address.slice(-4)}`}
+                            {payerUsernames.has(address)
+                              ? `@${payerUsernames.get(address)}`
+                              : expectedParticipants.find((participant) => participant.address.toLowerCase() === address)?.name || `${address.slice(0, 6)}…${address.slice(-4)}`}
                             {count > 1 ? ` (${count} shares)` : ""}
                           </span>
                         ))}

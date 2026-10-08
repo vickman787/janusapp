@@ -211,6 +211,7 @@ export interface SplitItem {
     paidAt: number;
     txHash: string;
     amount: string;
+    username?: string;
   }>;
   participants?: Array<{
     address: string;

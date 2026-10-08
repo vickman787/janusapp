@@ -18,6 +18,7 @@ export interface SplitRecordData {
     paidAt: number;
     txHash: string;
     amount: string;
+    username?: string;
   }>;
   participants?: Array<{
     address: string;
@@ -119,7 +120,12 @@ interface GroupRow {
   created_at: number;
 }
 
-function splitFromRow(row: SplitRow, payments: PaymentRow[], participants: ParticipantRow[] = []): SplitRecordData {
+function splitFromRow(
+  row: SplitRow,
+  payments: PaymentRow[],
+  participants: ParticipantRow[] = [],
+  payerUsernames: Map<string, string> = new Map()
+): SplitRecordData {
   return {
     splitId: row.split_id,
     contractAddress: row.contract_address,
@@ -138,6 +144,7 @@ function splitFromRow(row: SplitRow, payments: PaymentRow[], participants: Parti
       paidAt: Number(payment.paid_at),
       txHash: payment.tx_hash,
       amount: payment.amount,
+      username: payerUsernames.get(payment.payer_address.toLowerCase()),
     })),
     participants: participants.map((participant) => ({
       address: participant.wallet_address,
@@ -166,12 +173,30 @@ async function participantsForSplit(splitId: string): Promise<ParticipantRow[]> 
   return (data || []) as ParticipantRow[];
 }
 
+async function usernamesForWalletAddresses(walletAddresses: string[]): Promise<Map<string, string>> {
+  const addresses = Array.from(new Set(walletAddresses.map((address) => address.toLowerCase())));
+  if (addresses.length === 0) return new Map();
+
+  const { data, error } = await supabaseAdmin
+    .from("profiles")
+    .select("wallet_address, username")
+    .in("wallet_address", addresses);
+  if (error) throw error;
+
+  return new Map(
+    (data || []).map((profile) => [profile.wallet_address.toLowerCase(), profile.username])
+  );
+}
+
 async function hydrateSplit(row: SplitRow): Promise<SplitRecordData> {
   const [payments, participants] = await Promise.all([
     paymentsForSplit(row.split_id),
     participantsForSplit(row.split_id),
   ]);
-  return splitFromRow(row, payments, participants);
+  const payerUsernames = await usernamesForWalletAddresses(
+    payments.map((payment) => payment.payer_address)
+  );
+  return splitFromRow(row, payments, participants, payerUsernames);
 }
 
 export async function saveSplit(split: SplitRecordData): Promise<SplitRecordData> {
@@ -460,15 +485,7 @@ export async function getUserSplits(address: string): Promise<SplitRecordData[]>
     rows.set(row.split_id, row);
   }
 
-  return Promise.all(
-    Array.from(rows.values()).map(async (row) => {
-      const [payments, participants] = await Promise.all([
-        paymentsForSplit(row.split_id),
-        participantsForSplit(row.split_id),
-      ]);
-      return splitFromRow(row, payments, participants);
-    })
-  );
+  return Promise.all(Array.from(rows.values()).map(hydrateSplit));
 }
 
 export async function getPaymentsDue(address: string): Promise<PaymentDueData[]> {
