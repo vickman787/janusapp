@@ -529,7 +529,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0813] text-white px-5 pt-6 pb-28 max-w-[1180px] mx-auto relative flex flex-col justify-between sm:px-8 lg:px-10">
+    <main className="relative mx-auto flex min-h-screen max-w-xl flex-col justify-between bg-[#0B0813] px-4 pb-40 pt-5 text-white min-[380px]:px-5 sm:px-8 sm:pt-6">
       {showUsernamePrompt && (
         <div className="fixed inset-0 z-[100] bg-[#0B0813]/80 backdrop-blur-sm flex items-center justify-center p-5">
           <div className="w-full max-w-sm rounded-xl border border-white/15 bg-[#13101D] p-6">
@@ -545,19 +545,20 @@ export default function DashboardPage() {
       )}
       <div>
         {/* ── Top Header Navigation Bar ── */}
-        <header className="flex items-center justify-between border-b border-white/10 pb-6 mb-10">
-          <Link href="/" aria-label="Back to JANUS home" className="hover:opacity-95 transition-opacity">
-            <JanusLogo size={36} showText={true} />
+        <header className="mb-8 flex items-center justify-between gap-3 border-b border-white/10 pb-5 sm:mb-10 sm:pb-6">
+          <Link href="/" aria-label="Back to JANUS home" className="min-w-0 shrink hover:opacity-95 transition-opacity">
+            <JanusLogo size={34} showText={true} />
           </Link>
 
           {/* Privy Auth Button / Status */}
           {!authenticated ? (
             <button
               onClick={login}
-              className="flex items-center gap-2 py-2.5 px-4 rounded-lg bg-[#836EF9] text-white text-xs font-semibold hover:bg-[#927fff] transition-all active:scale-95"
+              className="flex shrink-0 items-center gap-2 rounded-lg bg-[#836EF9] px-3 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#927fff] active:scale-95 sm:px-4"
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>Connect / Sign In</span>
+              <span className="sm:hidden">Sign in</span>
+              <span className="hidden sm:inline">Connect / Sign In</span>
             </button>
           ) : (
             <div className="flex items-center gap-2">

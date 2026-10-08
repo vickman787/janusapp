@@ -68,7 +68,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md px-4 pb-5 pt-2">
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto w-[calc(100%-1rem)] max-w-md pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2">
       <div className="flex items-center justify-around rounded-2xl border border-white/10 bg-[#161224]/95 p-2 shadow-[0_10px_30px_rgba(0,0,0,0.42)] backdrop-blur-xl">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -82,7 +82,7 @@ export function BottomNav() {
             <Link
               key={item.label}
               href={item.href}
-              className={`relative flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1.5 transition-colors ${
+              className={`relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-lg px-1 py-1.5 transition-colors ${
                 isActive
                   ? "text-[#A78BFA] font-semibold"
                   : "text-white/40 hover:text-white/80"

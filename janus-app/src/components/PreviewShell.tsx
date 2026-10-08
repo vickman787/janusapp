@@ -11,9 +11,9 @@ export function PreviewShell({
 }) {
   return (
     <div className="min-h-screen bg-[#0B0813] text-[#F7F5FB]">
-      <header className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-5 py-6 sm:px-8 lg:px-10">
+      <header className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-10">
         <Link href="/" aria-label="JANUS home" className="shrink-0">
-          <JanusLogo size={34} showText />
+          <JanusLogo size={32} showText />
         </Link>
         <nav className="hidden items-center gap-8 text-sm text-white/55 sm:flex">
           <Link href="/" className={active === "welcome" ? "text-white" : "transition-colors hover:text-white"}>
