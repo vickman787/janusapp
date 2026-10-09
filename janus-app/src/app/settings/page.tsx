@@ -7,12 +7,13 @@ import {
   LogOut,
   LogIn,
   ArrowLeft,
+  Fingerprint,
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { JanusLogo } from "@/components/JanusLogo";
 import { BottomNav } from "@/components/BottomNav";
-import { getAccessToken, getIdentityToken, usePrivy, useSendTransaction, useSignMessage } from "@privy-io/react-auth";
+import { getAccessToken, getIdentityToken, useLinkAccount, usePrivy, useSendTransaction, useSignMessage } from "@privy-io/react-auth";
 import { profileProofMessage } from "@/lib/profileProof";
 import { encodeFunctionData } from "viem";
 import {
@@ -27,6 +28,7 @@ import {
 
 export default function SettingsPage() {
   const { login, logout, authenticated, user } = usePrivy();
+  const { linkPasskey } = useLinkAccount();
   const { sendTransaction } = useSendTransaction();
   const { signMessage } = useSignMessage();
   const [copiedAddress, setCopiedAddress] = useState(false);
@@ -42,6 +44,7 @@ export default function SettingsPage() {
   const [isSavingUsername, setIsSavingUsername] = useState(false);
 
   const activeAddress = user?.wallet?.address;
+  const hasPasskey = user?.linkedAccounts.some((account) => account.type === "passkey") ?? false;
 
   useEffect(() => {
     if (!authenticated || !activeAddress) return;
@@ -313,6 +316,31 @@ export default function SettingsPage() {
             Account actions
           </p>
           <div className="divide-y divide-white/10 border-y border-white/10">
+            {authenticated && (
+              <button
+                onClick={() => linkPasskey({ name: "JANUS" })}
+                disabled={hasPasskey}
+                className="flex w-full items-center justify-between gap-6 py-3.5 text-left transition-colors hover:bg-white/[0.02] disabled:cursor-default disabled:hover:bg-transparent"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <Fingerprint className="h-4 w-4 shrink-0 text-[#A78BFA]" />
+                  <div className="min-w-0">
+                    <span className="block text-sm font-medium text-white">
+                      Passkey
+                    </span>
+                    <span className="mt-0.5 block text-xs text-white/40">
+                      {hasPasskey
+                        ? "Registered for password-free sign in"
+                        : "Use your fingerprint, face, or device PIN"}
+                    </span>
+                  </div>
+                </div>
+                <span className={`shrink-0 text-xs font-semibold ${hasPasskey ? "text-[#10B981]" : "text-[#A78BFA]"}`}>
+                  {hasPasskey ? "Ready" : "Add passkey"}
+                </span>
+              </button>
+            )}
+
             {/* Claim Faucet Button */}
             <button
               onClick={handleClaimFaucet}
