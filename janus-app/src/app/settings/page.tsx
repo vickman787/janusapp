@@ -47,9 +47,13 @@ export default function SettingsPage() {
   const hasPasskey = user?.linkedAccounts.some((account) => account.type === "passkey") ?? false;
 
   async function handleDisconnect() {
+    const fallbackRedirect = window.setTimeout(() => {
+      window.location.replace("/");
+    }, 1500);
     try {
       await logout();
     } finally {
+      window.clearTimeout(fallbackRedirect);
       window.location.replace("/");
     }
   }

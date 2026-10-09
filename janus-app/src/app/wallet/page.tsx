@@ -75,9 +75,13 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
 
   async function handleDisconnect() {
+    const fallbackRedirect = window.setTimeout(() => {
+      window.location.replace("/");
+    }, 1500);
     try {
       await logout();
     } finally {
+      window.clearTimeout(fallbackRedirect);
       window.location.replace("/");
     }
   }
@@ -356,21 +360,25 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (authenticated && activeAddress) {
+      const refreshVisibleData = () => {
+        if (document.visibilityState !== "visible") return;
+        void refreshBalance();
+        void refreshActivity();
+      };
       const initialRefresh = setTimeout(() => {
-        refreshBalance();
-        refreshActivity();
+        refreshVisibleData();
       }, 0);
 
-      // One refresh every two minutes while the page is visible. The manual
-      // refresh button remains available for an immediate update.
-      const refreshTimer = setInterval(() => {
-        if (document.visibilityState !== "visible") return;
-        refreshBalance();
-        refreshActivity();
-      }, 120000);
+      // Keep activity current while avoiding unnecessary background requests.
+      const refreshTimer = window.setInterval(refreshVisibleData, 15000);
+      const handleVisibilityChange = () => refreshVisibleData();
+      window.addEventListener("focus", refreshVisibleData);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
       return () => {
         clearTimeout(initialRefresh);
-        clearInterval(refreshTimer);
+        window.clearInterval(refreshTimer);
+        window.removeEventListener("focus", refreshVisibleData);
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
       };
     } else {
       const reset = setTimeout(() => {
@@ -1144,7 +1152,6 @@ export default function DashboardPage() {
                     className="inline-flex items-center gap-1.5 text-xs text-[#A78BFA] hover:underline"
                   >
                     <span>View transaction ↗</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 )}
 
