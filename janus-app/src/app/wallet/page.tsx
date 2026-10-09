@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Send,
   ArrowUpRight,
@@ -52,6 +53,7 @@ import {
 } from "@/lib/activityStore";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { login, logout, authenticated, user } = usePrivy();
   const { sendTransaction } = useSendTransaction();
 
@@ -73,6 +75,11 @@ export default function DashboardPage() {
 
   // Address copy state
   const [copied, setCopied] = useState(false);
+
+  async function handleDisconnect() {
+    await logout();
+    router.replace("/");
+  }
 
   // Send modal state
   const [sendModalOpen, setSendModalOpen] = useState(false);
@@ -578,7 +585,7 @@ export default function DashboardPage() {
                 <ChevronDown className="w-3.5 h-3.5 text-white/50" />
               </Link>
               <button
-                onClick={logout}
+                onClick={handleDisconnect}
                 className="p-2 rounded-lg bg-[#161224]/80 border border-white/10 hover:border-red-500/50 hover:text-red-400 text-white/50 transition-colors"
                 title="Disconnect"
               >

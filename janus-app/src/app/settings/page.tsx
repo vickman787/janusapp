@@ -11,6 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { JanusLogo } from "@/components/JanusLogo";
 import { BottomNav } from "@/components/BottomNav";
 import { getAccessToken, getIdentityToken, useLinkAccount, usePrivy, useSendTransaction, useSignMessage } from "@privy-io/react-auth";
@@ -27,6 +28,7 @@ import {
 } from "@/lib/web3";
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { login, logout, authenticated, user } = usePrivy();
   const { linkPasskey } = useLinkAccount();
   const { sendTransaction } = useSendTransaction();
@@ -45,6 +47,11 @@ export default function SettingsPage() {
 
   const activeAddress = user?.wallet?.address;
   const hasPasskey = user?.linkedAccounts.some((account) => account.type === "passkey") ?? false;
+
+  async function handleDisconnect() {
+    await logout();
+    router.replace("/");
+  }
 
   useEffect(() => {
     if (!authenticated || !activeAddress) return;
@@ -386,7 +393,7 @@ export default function SettingsPage() {
             {/* Privy Disconnect */}
             {authenticated ? (
               <button
-                onClick={logout}
+                onClick={handleDisconnect}
                 className="flex w-full items-center justify-between py-3.5 text-left text-red-300/75 transition-colors hover:text-red-300"
               >
                 <span className="text-sm font-medium">Disconnect account</span>
