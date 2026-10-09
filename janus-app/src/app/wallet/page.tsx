@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Send,
   ArrowUpRight,
@@ -53,7 +52,6 @@ import {
 } from "@/lib/activityStore";
 
 export default function DashboardPage() {
-  const router = useRouter();
   const { login, logout, authenticated, user } = usePrivy();
   const { sendTransaction } = useSendTransaction();
 
@@ -77,8 +75,11 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
 
   async function handleDisconnect() {
-    await logout();
-    router.replace("/");
+    try {
+      await logout();
+    } finally {
+      window.location.replace("/");
+    }
   }
 
   // Send modal state

@@ -11,7 +11,6 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { JanusLogo } from "@/components/JanusLogo";
 import { BottomNav } from "@/components/BottomNav";
 import { getAccessToken, getIdentityToken, useLinkAccount, usePrivy, useSendTransaction, useSignMessage } from "@privy-io/react-auth";
@@ -28,7 +27,6 @@ import {
 } from "@/lib/web3";
 
 export default function SettingsPage() {
-  const router = useRouter();
   const { login, logout, authenticated, user } = usePrivy();
   const { linkPasskey } = useLinkAccount();
   const { sendTransaction } = useSendTransaction();
@@ -49,8 +47,11 @@ export default function SettingsPage() {
   const hasPasskey = user?.linkedAccounts.some((account) => account.type === "passkey") ?? false;
 
   async function handleDisconnect() {
-    await logout();
-    router.replace("/");
+    try {
+      await logout();
+    } finally {
+      window.location.replace("/");
+    }
   }
 
   useEffect(() => {
