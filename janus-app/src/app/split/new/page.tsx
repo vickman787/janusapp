@@ -12,6 +12,7 @@ import {
   Loader2,
   ExternalLink,
   CheckCircle2,
+  UserRound,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { JanusLogo } from "@/components/JanusLogo";
@@ -493,8 +494,14 @@ function SplitPageContent() {
                 className="flex items-center justify-between py-4 hover:bg-white/[0.02] transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 border border-white/15 flex items-center justify-center text-xs font-semibold text-white/75 shrink-0">
-                    {p.name.slice(0, 1).toUpperCase()}
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center border ${
+                      p.isOwner
+                        ? "border-[#836EF9]/55 text-[#AFA3FF]"
+                        : "border-white/15 text-white/45"
+                    }`}
+                  >
+                    <UserRound className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white flex items-center gap-2">
