@@ -4,7 +4,7 @@
 
 [Live app](https://www.janusapp.xyz/) · [Monad Testnet explorer](https://testnet.monadscan.com/)
 
-## What we built
+## What I built
 
 JANUS turns a shared expense into a link that people can pay from any device. The organizer creates either a named split for specific JANUS users or an open split with a fixed number of payment slots. JANUS calculates each share, generates a payer link and QR code, and closes the split as payments settle on-chain.
 
