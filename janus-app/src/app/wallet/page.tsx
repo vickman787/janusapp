@@ -1144,30 +1144,32 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {sendTxHash && (
-                  <a
-                    href={`https://testnet.monadscan.com/tx/${sendTxHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-[#A78BFA] hover:underline"
-                  >
-                    <span>View transaction ↗</span>
-                  </a>
-                )}
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+                  {sendTxHash && (
+                    <a
+                      href={`https://testnet.monadscan.com/tx/${sendTxHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-xs text-[#A78BFA] hover:underline"
+                    >
+                      <span>View transaction ↗</span>
+                    </a>
+                  )}
 
-                <button
-                  onClick={() => {
-                    setSendSent(false);
-                    setSendModalOpen(false);
-                    setSendTo("");
-                    setSendAmount("");
-                    setSendTxHash(null);
-                    setSendIndexPending(false);
-                  }}
-                  className="mt-3 px-5 py-2 rounded-xl bg-[#0B0813] border border-[#2A2242] text-xs font-semibold text-white/80 hover:text-white"
-                >
-                  Done
-                </button>
+                  <button
+                    onClick={() => {
+                      setSendSent(false);
+                      setSendModalOpen(false);
+                      setSendTo("");
+                      setSendAmount("");
+                      setSendTxHash(null);
+                      setSendIndexPending(false);
+                    }}
+                    className="rounded-xl border border-[#2A2242] bg-[#0B0813] px-5 py-2 text-xs font-semibold text-white/80 hover:text-white"
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleSendSubmit} className="space-y-4">
